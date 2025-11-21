@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -134,7 +137,18 @@ func checkLink(ctx context.Context, link string) types.StatusEnum {
 		Timeout: 5 * time.Second,
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", link, nil)
+	if !strings.Contains(link, "://") {
+		link = "https://" + link
+	}
+
+	url, err := url.Parse(link)
+	if err != nil {
+		return types.NotAvailable
+	}
+
+	fmt.Println(url.String())
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url.String(), nil)
 	if err != nil {
 		return types.NotAvailable
 	}
